@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <ButtonDebounce.h>
+#include <ESP8266WiFi.h>
 
 #define BUT_OPEN_PIN D6
 #define BUT_CLOSE_PIN D5
@@ -10,7 +11,7 @@
 #define DEBOUNCE_TIME 125
 
 enum State {
-    PREBOOT, BOOT, SETUP, OPENING, OPENED, CLOSING, CLOSED, ERROR
+    VLV_PREBOOT, VLV_BOOT, VLV_SETUP, VLV_OPENING, VLV_OPENED, VLV_CLOSING, VLV_CLOSED, VLV_ERROR
 };
 
 #define PREBOOT_LENGTH 500
@@ -21,7 +22,7 @@ enum State {
 ButtonDebounce butOpen(BUT_OPEN_PIN, DEBOUNCE_TIME),
     butClose(BUT_CLOSE_PIN, DEBOUNCE_TIME);
 
-State appState = PREBOOT;
+State appState = VLV_PREBOOT;
 uint32_t timestamp = 0, now = 0, ledVal = 0;
 
 void setup() {
@@ -39,51 +40,51 @@ void loop() {
     butClose.update();
     butOpen.update();
     switch(appState) {
-        case PREBOOT: //wait for eventual buttons debounce
+        case VLV_PREBOOT: //wait for eventual buttons debounce
             if ((now - timestamp) >= PREBOOT_LENGTH) {
                 timestamp = now;
-                appState = BOOT;
+                appState = VLV_BOOT;
             }
-        case BOOT: //check if close button was pressed for at least 5 sec., if it was enter setup state
+        case VLV_BOOT: //check if close button was pressed for at least 5 sec., if it was enter setup state
             if (butClose.state() == LOW) {
                 if ((now - timestamp) >= BOOT_BUTTON_WAIT) {
-                    appState = SETUP;
+                    appState = VLV_SETUP;
                 }
             } else {
-                appState = CLOSING;
+                appState = VLV_CLOSING;
             }
             ledVal = 256;
             break;
-        case SETUP:
-            appState = CLOSING; //temporary
+        case VLV_SETUP:
+            appState = VLV_CLOSING; //temporary
             ledVal = 1024;
             break;
-        case OPENED:
+        case VLV_OPENED:
             if (butClose.state() == LOW) {
                 timestamp = now;
-                appState = CLOSING;
+                appState = VLV_CLOSING;
             }
             ledVal = ((now / 2048) % 2) ? (now % 2048 / 2) : 1023 - (now % 2048 / 2);
             break;
-        case CLOSED:
+        case VLV_CLOSED:
             if (butOpen.state() == LOW) {
                 timestamp = now;
-                appState = OPENING;
+                appState = VLV_OPENING;
             }
             ledVal = ((now / 1024) % 2) ? (now % 1024) : 1023 - (now % 1024);
             break;
-        case OPENING:
+        case VLV_OPENING:
             if ((now - timestamp) >= RELAY_OPEN_TIME) {
-                appState = OPENED;
+                appState = VLV_OPENED;
                 digitalWrite(OUT_OPEN_PIN, 0);
             } else {
                 digitalWrite(OUT_OPEN_PIN, 1);
             }
             ledVal = (now / 125) % 2 * 512;
             break;
-        case CLOSING:
+        case VLV_CLOSING:
             if ((now - timestamp) >= RELAY_OPEN_TIME) {
-                appState = CLOSED;
+                appState = VLV_CLOSED;
                 digitalWrite(OUT_CLOSE_PIN, 0);
             } else {
                 digitalWrite(OUT_CLOSE_PIN, 1);
