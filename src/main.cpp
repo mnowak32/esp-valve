@@ -2,11 +2,11 @@
 #include <ButtonDebounce.h>
 #include <ESP8266WiFi.h>
 
-#define BUT_OPEN_PIN D6
-#define BUT_CLOSE_PIN D5
+#define BUT_OPEN_PIN D5
+#define BUT_CLOSE_PIN D6
 #define OUT_OPEN_PIN D2
 #define OUT_CLOSE_PIN D1
-#define OUT_LED_PIN D4
+#define OUT_LED_PIN D7
 
 #define DEBOUNCE_TIME 125
 
