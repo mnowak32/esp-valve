@@ -1,6 +1,10 @@
 #include <Arduino.h>
 #include <ButtonDebounce.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+#include <DNSServer.h>
+
+#include <WifiManager.h>
 
 #define BUT_OPEN_PIN D5
 #define BUT_CLOSE_PIN D6
@@ -25,7 +29,12 @@ ButtonDebounce butOpen(BUT_OPEN_PIN, DEBOUNCE_TIME),
 State appState = VLV_PREBOOT;
 uint32_t timestamp = 0, now = 0, ledVal = 0;
 
+#define WIFI_AP_SSID "Boring AP"
+#define WIFI_AP_PASS "defaultPass"
+
 void setup() {
+    WiFiManager wifiMan;
+
     timestamp = millis();
     pinMode(BUT_OPEN_PIN, INPUT_PULLUP);
     pinMode(BUT_CLOSE_PIN, INPUT_PULLUP);
@@ -33,6 +42,9 @@ void setup() {
     pinMode(OUT_CLOSE_PIN, OUTPUT);
     pinMode(OUT_LED_PIN, OUTPUT);
     analogWriteRange(1023);
+
+    Serial.begin(115200);
+    wifiMan.autoConnect(WIFI_AP_SSID, WIFI_AP_PASS);
 }
 
 void loop() {
@@ -55,9 +67,13 @@ void loop() {
             }
             ledVal = 256;
             break;
-        case VLV_SETUP:
-            appState = VLV_CLOSING; //temporary
-            ledVal = 1024;
+        case VLV_SETUP: {
+                WiFiManager wifiMan;
+                Serial.println("Entering setup on demand");
+                wifiMan.startConfigPortal(WIFI_AP_SSID, WIFI_AP_PASS);
+                Serial.println("After setup... (resetting)");
+                ESP.reset();
+            }
             break;
         case VLV_OPENED:
             if (butClose.state() == LOW) {
