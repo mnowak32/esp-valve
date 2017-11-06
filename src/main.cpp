@@ -77,14 +77,14 @@ void setup() {
 
 BLYNK_WRITE(BLYNK_BUT_OPEN) {
     int value = param.asInt();
-    if (value == 1) {
+    if (appState == VLV_CLOSED && value == 1) {
         cmd = CMD_OPEN;
     }
 }
 
 BLYNK_WRITE(BLYNK_BUT_CLOSE) {
     int value = param.asInt();
-    if (value == 1) {
+    if (appState == VLV_OPENED && value == 1) {
         cmd = CMD_CLOSE;
     }
 }
