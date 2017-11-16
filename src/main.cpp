@@ -68,7 +68,7 @@ void setup() {
     Serial.begin(115200);
     wifiMan.autoConnect(WIFI_AP_SSID, WIFI_AP_PASS);
 
-    Blynk.config(BLYNK_TOKEN);
+    Blynk.config(BLYNK_TOKEN, BLYNK_SERVER);
     while(Blynk.connect() != true) {}
     ledStatus.off();
     ledOpen.off();
@@ -105,8 +105,10 @@ void loop() {
                     appState = VLV_SETUP;
                 }
             } else {
+                cmd = CMD_NONE;
+                timestamp = now;
                 appState = VLV_CLOSING;
-                ledStatus.on();
+                ledClose.on();
             }
             ledVal = 256;
             break;

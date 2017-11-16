@@ -1,2 +1,2 @@
-#define BLYNK_TOKEN "insert your token here"
-#define BLYNK_SERVER "127.0.0.1"
+#define BLYNK_TOKEN "fd5773dc9211463699cf1dc5d95bcfd2"
+#define BLYNK_SERVER "5.135.158.34"
